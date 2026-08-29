@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gym Spin to Win</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0b0f0d;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 18px;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+.eyebrow {
+  color: #39ff88;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(38px, 12vw, 62px);
+  line-height: .95;
+  font-weight: 1000;
+  letter-spacing: -3px;
+}
+
+.subtitle {
+  color: #9ca3af;
+  font-size: 15px;
+  line-height: 1.5;
+  margin: 14px auto 24px;
+  max-width: 400px;
+}
+
+.machine {
+  background: linear-gradient(145deg, #252b28, #121614);
+  border: 2px solid #343b37;
+  border-radius: 26px;
+  padding: 15px;
+  box-shadow:
+    0 25px 60px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.machine-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px 5px 12px;
+}
+
+.machine-title {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #d1d5db;
+}
+
+.lights {
+  display: flex;
+  gap: 5px;
+}
+
+.light {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #facc15;
+  box-shadow: 0 0 9px rgba(250,204,21,.8);
+  animation: lightPulse 1s infinite alternate;
+}
+
+.light:nth-child(2) { animation-delay: .2s; }
+.light:nth-child(3) { animation-delay: .4s; }
+.light:nth-child(4) { animation-delay: .6s; }
+.light:nth-child(5) { animation-delay: .8s; }
+
+@keyframes lightPulse {
+  from { opacity: .35; }
+  to { opacity: 1; }
+}
+
+.screen {
+  position: relative;
+  background: #e5e7eb;
+  border-radius: 18px;
+  padding: 15px;
+  box-shadow: inset 0 3px 10px rgba(0,0,0,.2);
+}
+
+.pointer {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 0;
+  height: 0;
+  border-left: 13px solid transparent;
+  border-right: 13px solid transparent;
+  border-top: 23px solid #ef4444;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.4));
+}
+
+.reels {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.reel {
+  height: 115px;
+  background: white;
+  border: 3px solid #cbd5e1;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: clamp(45px, 14vw, 70px);
+  line-height: 1;
+  overflow: hidden;
+  user-select: none;
+  box-shadow:
+    inset 0 5px 12px rgba(0,0,0,.16),
+    0 2px 4px rgba(0,0,0,.12);
+}
+
+.spinning {
+  animation: reelShake .075s infinite;
+}
+
+@keyframes reelShake {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+  100% { transform: translateY(0); }
+}
+
+.payline {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.controls {
+  margin-top: 15px;
+}
+
+#spinButton {
+  width: 100%;
+  min-height: 60px;
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #4ade80, #22c55e);
+  color: #052e16;
+  font-size: 19px;
+  font-weight: 1000;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #15803d;
+  transition:
+    transform .08s,
+    box-shadow .08s,
+    opacity .15s;
+}
+
+#spinButton:active {
+  transform: translateY(5px);
+  box-shadow: 0 0 0 #15803d;
+}
+
+#spinButton:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.result {
+  margin-top: 15px;
+  min-height: 78px;
+  border-radius: 15px;
+  background: #252b28;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+}
+
+.result strong {
+  display: block;
+  font-size: 21px;
+}
+
+.result small {
+  display: block;
+  margin-top: 5px;
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.result.win {
+  background: linear-gradient(135deg, #14532d, #166534);
+  border: 2px solid #22c55e;
+  animation: winPulse .8s ease-in-out 3;
+}
+
+.result.win small {
+  color: #bbf7d0;
+}
+
+.result.unlucky {
+  background: #7f1d1d;
+  border: 2px solid #ef4444;
+}
+
+.result.unlucky small {
+  color: #fecaca;
+}
+
+.result.near {
+  background: #422006;
+  border: 2px solid #f59e0b;
+}
+
+.result.near small {
+  color: #fde68a;
+}
+
+@keyframes winPulse {
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+.fine-print {
+  color: #6b7280;
+  font-size: 11px;
+  line-height: 1.5;
+  margin-top: 15px;
+}
+
+@media (max-width: 360px) {
+  body {
+    padding: 10px;
+  }
+
+  .machine {
+    padding: 10px;
+  }
+
+  .reel {
+    height: 95px;
+  }
+
+  .screen {
+    padding: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinning {
+    animation: none;
+  }
+
+  .light {
+    animation: none;
+  }
+
+  .result.win {
+    animation: none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<main class="container">
+
+  <div class="eyebrow">
+    REFER A MATE • TAKE A SPIN
+  </div>
+
+  <h1>
+    SPIN TO WIN 💪
+  </h1>
+
+  <p class="subtitle">
+    Refer a friend to the gym and see
+    if you can hit three matching symbols.
+  </p>
+
+  <section class="machine">
+
+    <div class="machine-header">
+
+      <div class="machine-title">
+        GYM JACKPOT
+      </div>
+
+      <div class="lights">
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+        <span class="light"></span>
+      </div>
+
+    </div>
+
+    <div class="screen">
+
+      <div class="pointer"></div>
+
+      <div class="reels">
+
+        <div class="reel" id="reel1">🥤</div>
+        <div class="reel" id="reel2">🏆</div>
+        <div class="reel" id="reel3">🔥</div>
+
+      </div>
+
+      <div class="payline">
+        MATCH ALL 3 TO WIN
+      </div>
+
+    </div>
+
+    <div class="controls">
+
+      <button id="spinButton" type="button">
+        🎰 SPIN NOW
+      </button>
+
+      <div
+        class="result"
+        id="result"
+        aria-live="polite"
+      >
+        <div>
+          <strong>Ready?</strong>
+          <small>Can you hit three?</small>
+        </div>
+      </div>
+
+    </div>
+
+  </section>
+
+  <div class="fine-print">
+    Match 3 symbols to win •
+    Free drink • Free week •
+    2 free weeks • 3 burpees
+  </div>
+
+</main>
+
+<script>
+
+/* =====================================================
+   PRIZES
+
+   TOTAL WIN RATE = 20%
+
+   OF ALL SPINS:
+   Drink       = 7.5%
+   Free week   = 5.0%
+   2 weeks     = 2.0%
+   Burpees     = 5.5%
+   No win      = 80%
+
+   OF WINNING SPINS:
+   Drink       = 37.5%
+   Free week   = 25%
+   2 weeks     = 10%
+   Burpees     = 27.5%
+
+   OF LOSING SPINS:
+   1/3 = exactly two matching symbols
+   2/3 = no match
+===================================================== */
+
+const prizes = {
+
+  drink: {
+    symbol: "🥤",
+    text: "FREE DRINK 🥤",
+    type: "win"
+  },
+
+  week: {
+    symbol: "🏆",
+    text: "FREE WEEK 🏆",
+    type: "win"
+  },
+
+  twoWeeks: {
+    symbol: "🔥",
+    text: "2 FREE WEEKS 🔥",
+    type: "win"
+  },
+
+  burpees: {
+    symbol: "😈",
+    text: "3 BURPEES 😈",
+    type: "punishment"
+  }
+
+};
+
+
+/* =====================================================
+   ELEMENTS
+===================================================== */
+
+const reel1 = document.getElementById("reel1");
+const reel2 = document.getElementById("reel2");
+const reel3 = document.getElementById("reel3");
+
+const spinButton =
+  document.getElementById("spinButton");
+
+const result =
+  document.getElementById("result");
+
+let spinning = false;
+let audioContext = null;
+
+
+/* =====================================================
+   AUDIO
+===================================================== */
+
+function startAudio() {
+
+  if (!audioContext) {
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+  }
+
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
+
+}
+
+
+function playTone(
+  frequency,
+  duration,
+  type = "square",
+  volume = 0.035,
+  delay = 0
+) {
+
+  if (!audioContext) {
+    return;
+  }
+
+  const oscillator =
+    audioContext.createOscillator();
+
+  const gain =
+    audioContext.createGain();
+
+  oscillator.type = type;
+  oscillator.frequency.value = frequency;
+
+  const startTime =
+    audioContext.currentTime + delay;
+
+  const endTime =
+    startTime + duration;
+
+  gain.gain.setValueAtTime(
+    0,
+    startTime
+  );
+
+  gain.gain.linearRampToValueAtTime(
+    volume,
+    startTime + 0.01
+  );
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    endTime
+  );
+
+  oscillator.connect(gain);
+  gain.connect(audioContext.destination);
+
+  oscillator.start(startTime);
+  oscillator.stop(endTime + 0.02);
+
+}
+
+
+function tickSound() {
+
+  playTone(
+    120,
+    0.045,
+    "square",
+    0.025
+  );
+
+}
+
+
+function winSound() {
+
+  playTone(
+    523,
+    0.12,
+    "sine",
+    0.05
+  );
+
+  playTone(
+    659,
+    0.12,
+    "sine",
+    0.05,
+    0.12
+  );
+
+  playTone(
+    784,
+    0.15,
+    "sine",
+    0.055,
+    0.24
+  );
+
+  playTone(
+    1046,
+    0.35,
+    "sine",
+    0.06,
+    0.39
+  );
+
+}
+
+
+function loseSound() {
+
+  playTone(
+    220,
+    0.16,
+    "sawtooth",
+    0.035
+  );
+
+  playTone(
+    165,
+    0.3,
+    "sawtooth",
+    0.03,
+    0.16
+  );
+
+}
+
+
+function burpeeSound() {
+
+  playTone(
+    180,
+    0.10,
+    "sawtooth",
+    0.05
+  );
+
+  setTimeout(() => {
+
+    playTone(
+      120,
+      0.12,
+      "sawtooth",
+      0.055
+    );
+
+  }, 100);
+
+  setTimeout(() => {
+
+    playTone(
+      75,
+      0.18,
+      "square",
+      0.06
+    );
+
+  }, 220);
+
+  setTimeout(() => {
+
+    playTone(
+      45,
+      0.28,
+      "sawtooth",
+      0.05
+    );
+
+  }, 400);
+
+}
+
+
+/* =====================================================
+   SYMBOLS USED DURING ANIMATION
+===================================================== */
+
+const animationSymbols = [
+  "🥤",
+  "🏆",
+  "🔥",
+  "😈"
+];
+
+
+function randomAnimationSymbol() {
+
+  const index =
+    Math.floor(
+      Math.random() *
+      animationSymbols.length
+    );
+
+  return animationSymbols[index];
+
+}
+
+
+/* =====================================================
+   CHOOSE OUTCOME
+===================================================== */
+
+function chooseOutcome() {
+
+  const roll = Math.random();
+
+
+  /* ===================================================
+     80% = LOSS
+  =================================================== */
+
+  if (roll < 0.80) {
+
+    /*
+      One third of losses:
+      exactly two symbols match.
+    */
+
+    if (Math.random() < (1 / 3)) {
+
+      const matchIndex =
+        Math.floor(
+          Math.random() *
+          animationSymbols.length
+        );
+
+      const symbol =
+        animationSymbols[matchIndex];
+
+
+      let differentSymbol;
+
+      do {
+
+        const differentIndex =
+          Math.floor(
+            Math.random() *
+            animationSymbols.length
+          );
+
+        differentSymbol =
+          animationSymbols[differentIndex];
+
+      } while (
+        differentSymbol === symbol
+      );
+
+
+      /*
+        Randomly put the different
+        symbol in one of the 3 positions.
+      */
+
+      const position =
+        Math.floor(
+          Math.random() * 3
+        );
+
+      const symbols = [
+        symbol,
+        symbol,
+        symbol
+      ];
+
+      symbols[position] =
+        differentSymbol;
+
+
+      return {
+
+        win: false,
+        twoMatch: true,
+        symbols: symbols
+
+      };
+
+    }
+
+
+    /*
+      Two thirds of losses:
+      all three symbols are different.
+    */
+
+    const shuffled =
+      [...animationSymbols]
+        .sort(
+          () => Math.random() - 0.5
+        );
+
+
+    return {
+
+      win: false,
+      twoMatch: false,
+
+      symbols: [
+        shuffled[0],
+        shuffled[1],
+        shuffled[2]
+      ]
+
+    };
+
+  }
+
+
+  /* ===================================================
+     20% = WIN
+  =================================================== */
+
+  /*
+    Convert the 20% winning section
+    into a 0-1 scale.
+  */
+
+  const prizeRoll =
+    (roll - 0.80) / 0.20;
+
+
+  /*
+    37.5% of wins = FREE DRINK
+  */
+
+  if (prizeRoll < 0.375) {
+
+    return {
+
+      win: true,
+
+      prize: prizes.drink,
+
+      symbols: [
+        "🥤",
+        "🥤",
+        "🥤"
+      ]
+
+    };
+
+  }
+
+
+  /*
+    25% of wins = FREE WEEK
+  */
+
+  if (prizeRoll < 0.625) {
+
+    return {
+
+      win: true,
+
+      prize: prizes.week,
+
+      symbols: [
+        "🏆",
+        "🏆",
+        "🏆"
+      ]
+
+    };
+
+  }
+
+
+  /*
+    10% of wins = 2 FREE WEEKS
+  */
+
+  if (prizeRoll < 0.725) {
+
+    return {
+
+      win: true,
+
+      prize: prizes.twoWeeks,
+
+      symbols: [
+        "🔥",
+        "🔥",
+        "🔥"
+      ]
+
+    };
+
+  }
+
+
+  /*
+    Remaining 27.5% of wins
+    = BURPEES
+  */
+
+  return {
+
+    win: true,
+
+    prize: prizes.burpees,
+
+    symbols: [
+      "😈",
+      "😈",
+      "😈"
+    ]
+
+  };
+
+}
+
+
+/* =====================================================
+   SPIN REEL
+===================================================== */
+
+function spinReel(
+  reel,
+  duration,
+  finalSymbol
+) {
+
+  return new Promise(
+    function(resolve) {
+
+      const startTime =
+        performance.now();
+
+      let lastTick = 0;
+
+      reel.classList.add("spinning");
+
+
+      function animate(currentTime) {
+
+        const elapsed =
+          currentTime - startTime;
+
+
+        if (elapsed >= duration) {
+
+          reel.textContent =
+            finalSymbol;
+
+          reel.classList.remove("spinning");
+
+          resolve();
+
+          return;
+
+        }
+
+
+        const tickInterval =
+          Math.max(
+            45,
+            110 -
+            (
+              elapsed /
+              duration
+            ) * 55
+          );
+
+
+        if (
+          currentTime -
+          lastTick >
+          tickInterval
+        ) {
+
+          reel.textContent =
+            randomAnimationSymbol();
+
+          tickSound();
+
+          lastTick =
+            currentTime;
+
+        }
+
+
+        requestAnimationFrame(
+          animate
+        );
+
+      }
+
+
+      requestAnimationFrame(
+        animate
+      );
+
+    }
+  );
+
+}
+
+
+/* =====================================================
+   MAIN SPIN
+===================================================== */
+
+async function spin() {
+
+  if (spinning) {
+    return;
+  }
+
+  spinning = true;
+  spinButton.disabled = true;
+
+  startAudio();
+
+
+  result.className = "result";
+
+  result.innerHTML = `
+    <div>
+      <strong>Spinning...</strong>
+      <small>You need three matching symbols!</small>
+    </div>
+  `;
+
+
+  /*
+    Determine the result first.
+  */
+
+  const outcome =
+    chooseOutcome();
+
+
+  const final1 =
+    outcome.symbols[0];
+
+  const final2 =
+    outcome.symbols[1];
+
+  const final3 =
+    outcome.symbols[2];
+
+
+  /*
+    Spin reels one after another.
+  */
+
+  await spinReel(
+    reel1,
+    1000,
+    final1
+  );
+
+  await spinReel(
+    reel2,
+    1400,
+    final2
+  );
+
+  await spinReel(
+    reel3,
+    1800,
+    final3
+  );
+
+
+  /* ===================================================
+     WIN
+  =================================================== */
+
+  if (outcome.win) {
+
+    const prize =
+      outcome.prize;
+
+
+    /*
+      BURPEES
+    */
+
+    if (
+      prize === prizes.burpees
+    ) {
+
+      result.className =
+        "result unlucky";
+
+      result.innerHTML = `
+        <div>
+          <strong>😈 UNLUCKY!</strong>
+          <small>
+            THREE 😈 MATCH — 3 BURPEES!
+          </small>
+        </div>
+      `;
+
+      burpeeSound();
+
+    }
+
+
+    /*
+      NORMAL PRIZES
+    */
+
+    else {
+
+      result.className =
+        "result win";
+
+      result.innerHTML = `
+        <div>
+          <strong>🎉 ${prize.text}</strong>
+          <small>
+            THREE MATCH! YOU WIN!
+          </small>
+        </div>
+      `;
+
+      winSound();
+
+    }
+
+  }
+
+
+  /* ===================================================
+     TWO MATCH LOSS
+  =================================================== */
+
+  else if (outcome.twoMatch) {
+
+    result.className =
+      "result near";
+
+    result.innerHTML = `
+      <div>
+        <strong>😬 SO CLOSE!</strong>
+        <small>
+          You matched 2 — you need all 3!
+        </small>
+      </div>
+    `;
+
+    loseSound();
+
+  }
+
+
+  /* ===================================================
+     NORMAL LOSS
+  =================================================== */
+
+  else {
+
+    result.className =
+      "result";
+
+    result.innerHTML = `
+      <div>
+        <strong>😭 NO MATCH</strong>
+        <small>
+          Better luck next spin!
+        </small>
+      </div>
+    `;
+
+    loseSound();
+
+  }
+
+
+  /* ===================================================
+     RESET
+  =================================================== */
+
+  spinButton.textContent =
+    "🔄 SPIN AGAIN";
+
+  spinButton.disabled =
+    false;
+
+  spinning = false;
+
+}
+
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+spinButton.addEventListener(
+  "click",
+  spin
+);
+
+</script>
+
+</body>
+</html>
